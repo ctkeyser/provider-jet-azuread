@@ -27,16 +27,20 @@ import (
 
 	"github.com/crossplane/terrajet/pkg/terraform"
 
-	"github.com/crossplane-contrib/provider-jet-template/apis/v1alpha1"
+	"github.com/ctkeyser/provider-jet-azuread/apis/v1alpha1"
 )
 
 const (
+	keyAzureTenantID     = "tenantId"
+	keyAzureClientID     = "clientId"
+	keyAzureClientSecret = "clientSecret"
+
 	// error messages
 	errNoProviderConfig     = "no providerConfigRef provided"
 	errGetProviderConfig    = "cannot get referenced ProviderConfig"
 	errTrackUsage           = "cannot track ProviderConfig usage"
 	errExtractCredentials   = "cannot extract credentials"
-	errUnmarshalCredentials = "cannot unmarshal template credentials as JSON"
+	errUnmarshalCredentials = "cannot unmarshal azuread credentials as JSON"
 )
 
 // TerraformSetupBuilder builds Terraform a terraform.SetupFn function which
@@ -69,24 +73,16 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 		if err != nil {
 			return ps, errors.Wrap(err, errExtractCredentials)
 		}
-		templateCreds := map[string]string{}
-		if err := json.Unmarshal(data, &templateCreds); err != nil {
+		azureadCreds := map[string]string{}
+		if err := json.Unmarshal(data, &azureadCreds); err != nil {
 			return ps, errors.Wrap(err, errUnmarshalCredentials)
 		}
-
-		// set environment variables for sensitive provider configuration
-		// Deprecated: In shared gRPC mode we do not support injecting
-		// credentials via the environment variables. You should specify
-		// credentials via the Terraform main.tf.json instead.
-		/*ps.Env = []string{
-			fmt.Sprintf("%s=%s", "HASHICUPS_USERNAME", templateCreds["username"]),
-			fmt.Sprintf("%s=%s", "HASHICUPS_PASSWORD", templateCreds["password"]),
-		}*/
-		// set credentials in Terraform provider configuration
-		/*ps.Configuration = map[string]interface{}{
-			"username": templateCreds["username"],
-			"password": templateCreds["password"],
-		}*/
+		// set provider configuration
+		ps.Configuration = map[string]interface{}{
+			"tenant_id":     azureadCreds[keyAzureTenantID],
+			"client_id":     azureadCreds[keyAzureClientID],
+			"client_secret": azureadCreds[keyAzureClientSecret],
+		}
 		return ps, nil
 	}
 }

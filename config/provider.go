@@ -23,12 +23,13 @@ import (
 	tjconfig "github.com/crossplane/terrajet/pkg/config"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/crossplane-contrib/provider-jet-template/config/null"
+	"github.com/ctkeyser/provider-jet-azuread/config/group"
+	"github.com/ctkeyser/provider-jet-azuread/config/groupmember"
 )
 
 const (
-	resourcePrefix = "template"
-	modulePath     = "github.com/crossplane-contrib/provider-jet-template"
+	resourcePrefix = "azuread"
+	modulePath     = "github.com/ctkeyser/provider-jet-azuread"
 )
 
 //go:embed schema.json
@@ -44,11 +45,17 @@ func GetProvider() *tjconfig.Provider {
 	}
 
 	pc := tjconfig.NewProviderWithSchema([]byte(providerSchema), resourcePrefix, modulePath,
-		tjconfig.WithDefaultResourceFn(defaultResourceFn))
+		tjconfig.WithDefaultResourceFn(defaultResourceFn),
+		tjconfig.WithIncludeList([]string{
+			"azuread_group$",
+			"azuread_group_member$",
+		}),
+	)
 
 	for _, configure := range []func(provider *tjconfig.Provider){
 		// add custom config functions
-		null.Configure,
+		group.Configure,
+		groupmember.Configure,
 	} {
 		configure(pc)
 	}

@@ -25,62 +25,66 @@ import (
 	v1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
-type ResourceObservation struct {
+type MemberObservation struct {
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 }
 
-type ResourceParameters struct {
+type MemberParameters struct {
 
-	// A map of arbitrary strings that, when changed, will force the null resource to be replaced, re-running any associated provisioners.
-	// +kubebuilder:validation:Optional
-	Triggers map[string]*string `json:"triggers,omitempty" tf:"triggers,omitempty"`
+	// The object ID of the group you want to add the member to
+	// +kubebuilder:validation:Required
+	GroupObjectID *string `json:"groupObjectId" tf:"group_object_id,omitempty"`
+
+	// The object ID of the principal you want to add as a member to the group. Supported object types are Users, Groups or Service Principals
+	// +kubebuilder:validation:Required
+	MemberObjectID *string `json:"memberObjectId" tf:"member_object_id,omitempty"`
 }
 
-// ResourceSpec defines the desired state of Resource
-type ResourceSpec struct {
+// MemberSpec defines the desired state of Member
+type MemberSpec struct {
 	v1.ResourceSpec `json:",inline"`
-	ForProvider     ResourceParameters `json:"forProvider"`
+	ForProvider     MemberParameters `json:"forProvider"`
 }
 
-// ResourceStatus defines the observed state of Resource.
-type ResourceStatus struct {
+// MemberStatus defines the observed state of Member.
+type MemberStatus struct {
 	v1.ResourceStatus `json:",inline"`
-	AtProvider        ResourceObservation `json:"atProvider,omitempty"`
+	AtProvider        MemberObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// Resource is the Schema for the Resources API
+// Member is the Schema for the Members API
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="EXTERNAL-NAME",type="string",JSONPath=".metadata.annotations.crossplane\\.io/external-name"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,templatejet}
-type Resource struct {
+// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,azureadjet}
+type Member struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              ResourceSpec   `json:"spec"`
-	Status            ResourceStatus `json:"status,omitempty"`
+	Spec              MemberSpec   `json:"spec"`
+	Status            MemberStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// ResourceList contains a list of Resources
-type ResourceList struct {
+// MemberList contains a list of Members
+type MemberList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Resource `json:"items"`
+	Items           []Member `json:"items"`
 }
 
 // Repository type metadata.
 var (
-	Resource_Kind             = "Resource"
-	Resource_GroupKind        = schema.GroupKind{Group: CRDGroup, Kind: Resource_Kind}.String()
-	Resource_KindAPIVersion   = Resource_Kind + "." + CRDGroupVersion.String()
-	Resource_GroupVersionKind = CRDGroupVersion.WithKind(Resource_Kind)
+	Member_Kind             = "Member"
+	Member_GroupKind        = schema.GroupKind{Group: CRDGroup, Kind: Member_Kind}.String()
+	Member_KindAPIVersion   = Member_Kind + "." + CRDGroupVersion.String()
+	Member_GroupVersionKind = CRDGroupVersion.WithKind(Member_Kind)
 )
 
 func init() {
-	SchemeBuilder.Register(&Resource{}, &ResourceList{})
+	SchemeBuilder.Register(&Member{}, &MemberList{})
 }

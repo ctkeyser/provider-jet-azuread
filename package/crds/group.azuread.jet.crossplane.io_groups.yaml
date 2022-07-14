@@ -5,18 +5,18 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
-  name: resources.null.template.jet.crossplane.io
+  name: groups.group.azuread.jet.crossplane.io
 spec:
-  group: null.template.jet.crossplane.io
+  group: group.azuread.jet.crossplane.io
   names:
     categories:
     - crossplane
     - managed
-    - templatejet
-    kind: Resource
-    listKind: ResourceList
-    plural: resources
-    singular: resource
+    - azureadjet
+    kind: Group
+    listKind: GroupList
+    plural: groups
+    singular: group
   scope: Cluster
   versions:
   - additionalPrinterColumns:
@@ -35,7 +35,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Resource is the Schema for the Resources API
+        description: Group is the Schema for the Groups API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -50,7 +50,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: ResourceSpec defines the desired state of Resource
+            description: GroupSpec defines the desired state of Group
             properties:
               deletionPolicy:
                 default: Delete
@@ -63,13 +63,109 @@ spec:
                 type: string
               forProvider:
                 properties:
-                  triggers:
-                    additionalProperties:
+                  assignableToRole:
+                    description: Indicates whether this group can be assigned to an
+                      Azure Active Directory role. This property can only be `true`
+                      for security-enabled groups.
+                    type: boolean
+                  autoSubscribeNewMembers:
+                    description: Indicates whether new members added to the group
+                      will be auto-subscribed to receive email notifications.
+                    type: boolean
+                  behaviors:
+                    description: The group behaviours for a Microsoft 365 group
+                    items:
                       type: string
-                    description: A map of arbitrary strings that, when changed, will
-                      force the null resource to be replaced, re-running any associated
-                      provisioners.
-                    type: object
+                    type: array
+                  description:
+                    description: The description for the group
+                    type: string
+                  displayName:
+                    description: The display name for the group
+                    type: string
+                  dynamicMembership:
+                    description: An optional block to configure dynamic membership
+                      for the group. Cannot be used with `members`
+                    items:
+                      properties:
+                        enabled:
+                          type: boolean
+                        rule:
+                          description: Rule to determine members for a dynamic group.
+                            Required when `group_types` contains 'DynamicMembership'
+                          type: string
+                      required:
+                      - enabled
+                      - rule
+                      type: object
+                    type: array
+                  externalSendersAllowed:
+                    description: Indicates whether people external to the organization
+                      can send messages to the group.
+                    type: boolean
+                  hideFromAddressLists:
+                    description: 'Indicates whether the group is displayed in certain
+                      parts of the Outlook user interface: in the Address Book, in
+                      address lists for selecting message recipients, and in the Browse
+                      Groups dialog for searching groups.'
+                    type: boolean
+                  hideFromOutlookClients:
+                    description: Indicates whether the group is displayed in Outlook
+                      clients, such as Outlook for Windows and Outlook on the web.
+                    type: boolean
+                  mailEnabled:
+                    description: Whether the group is a mail enabled, with a shared
+                      group mailbox. At least one of `mail_enabled` or `security_enabled`
+                      must be specified. A group can be mail enabled _and_ security
+                      enabled
+                    type: boolean
+                  mailNickname:
+                    description: The mail alias for the group, unique in the organisation
+                    type: string
+                  members:
+                    description: A set of members who should be present in this group.
+                      Supported object types are Users, Groups or Service Principals
+                    items:
+                      type: string
+                    type: array
+                  owners:
+                    description: A set of owners who own this group. Supported object
+                      types are Users or Service Principals
+                    items:
+                      type: string
+                    type: array
+                  preventDuplicateNames:
+                    description: If `true`, will return an error if an existing group
+                      is found with the same name
+                    type: boolean
+                  provisioningOptions:
+                    description: The group provisioning options for a Microsoft 365
+                      group
+                    items:
+                      type: string
+                    type: array
+                  securityEnabled:
+                    description: Whether the group is a security group for controlling
+                      access to in-app resources. At least one of `security_enabled`
+                      or `mail_enabled` must be specified. A group can be security
+                      enabled _and_ mail enabled
+                    type: boolean
+                  theme:
+                    description: The colour theme for a Microsoft 365 group
+                    type: string
+                  types:
+                    description: A set of group types to configure for the group.
+                      `Unified` specifies a Microsoft 365 group. Required when `mail_enabled`
+                      is true
+                    items:
+                      type: string
+                    type: array
+                  visibility:
+                    description: Specifies the group join policy and group content
+                      visibility
+                    type: string
+                required:
+                - displayName
                 type: object
               providerConfigRef:
                 default:
@@ -168,12 +264,32 @@ spec:
             - forProvider
             type: object
           status:
-            description: ResourceStatus defines the observed state of Resource.
+            description: GroupStatus defines the observed state of Group.
             properties:
               atProvider:
                 properties:
                   id:
                     type: string
+                  mail:
+                    type: string
+                  objectId:
+                    type: string
+                  onpremisesDomainName:
+                    type: string
+                  onpremisesNetbiosName:
+                    type: string
+                  onpremisesSamAccountName:
+                    type: string
+                  onpremisesSecurityIdentifier:
+                    type: string
+                  onpremisesSyncEnabled:
+                    type: boolean
+                  preferredLanguage:
+                    type: string
+                  proxyAddresses:
+                    items:
+                      type: string
+                    type: array
                 type: object
               conditions:
                 description: Conditions of the resource.

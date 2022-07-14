@@ -10,6 +10,7 @@ export TERRAFORM_PROVIDER_SOURCE := hashicorp/azuread
 export TERRAFORM_PROVIDER_VERSION := 2.26.1
 export TERRAFORM_PROVIDER_DOWNLOAD_NAME := terraform-provider-azuread
 export TERRAFORM_PROVIDER_DOWNLOAD_URL_PREFIX := https://releases.hashicorp.com/terraform-provider-azuread/2.26.1
+export TERRAFORM_NATIVE_PROVIDER_BINARY := terraform-provider-azuread_v2.26.1_x5
 
 PLATFORMS ?= linux_amd64 linux_arm64
 
